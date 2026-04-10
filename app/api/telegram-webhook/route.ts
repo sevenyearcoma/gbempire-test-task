@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabaseServer } from "@/lib/supabase-server";
+import { sendTelegramMessage } from "@/lib/telegram";
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,20 +10,13 @@ export async function POST(request: NextRequest) {
         const text = body.message?.text;
 
         if (chatId && text === "/start") {
-            const { error } = await supabase
+            const { error } = await getSupabaseServer()
                 .from("telegram_users")
                 .upsert({ chat_id: chatId, first_name: firstName }, { onConflict: "chat_id" });
 
             if (error) throw error;
 
-            await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: "Вы подписаны на уведомления о крупных заказах! 🚀",
-                }),
-            });
+            await sendTelegramMessage(chatId, "Вы подписаны на уведомления о крупных заказах.");
         }
 
         return NextResponse.json({ ok: true });

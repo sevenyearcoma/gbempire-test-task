@@ -1,6 +1,7 @@
 ﻿export const dynamic = "force-dynamic";
 
-import { getSupabase, Order, OrderItem, parseItems } from "@/lib/supabase";
+import { Order, OrderItem, parseItems } from "@/lib/supabase";
+import { getSupabaseServer } from "@/lib/supabase-server";
 import StatsCards from "@/components/StatsCards";
 import ByCityChart from "@/components/ByCityChart";
 import BySourceChart from "@/components/BySourceChart";
@@ -17,9 +18,10 @@ function groupBy<T>(arr: T[], key: keyof T): Record<string, T[]> {
 }
 
 export default async function Home() {
-  const { data: orders, error } = await getSupabase()
+  const { data: orders, error } = await getSupabaseServer()
     .from("orders")
     .select("*")
+    .order("retailcrm_id", { ascending: false })
     .returns<Order[]>();
 
   if (error || !orders) {

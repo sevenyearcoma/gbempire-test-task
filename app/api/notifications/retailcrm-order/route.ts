@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { broadcastTelegramMessage } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
@@ -119,57 +114,6 @@ function formatTelegramMessage(order: OrderPayload, total: number): string {
   return lines.join("\n");
 }
 
-async function sendTelegramMessage(text: string) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-
-  if (!token || !chatId) {
-    throw new Error("Telegram env vars missing");
-  }
-
-  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      disable_web_page_preview: true,
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Telegram send failed: ${response.status} ${body}`);
-  }
-}
-
-async function broadcastToAll(text: string) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-
-  const { data: users, error } = await supabase
-    .from("telegram_users")
-    .select("chat_id");
-
-  if (error || !users) {
-    console.error("Ошибка получения пользователей:", error);
-    return;
-  }
-
-  const requests = users.map((user) =>
-    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        chat_id: user.chat_id,
-        text,
-        disable_web_page_preview: true,
-      }),
-    })
-  );
-
-  await Promise.allSettled(requests);
-}
-
 export async function POST(request: NextRequest) {
   if (!isAuthorized(request)) {
     return unauthorized();
@@ -186,10 +130,15 @@ export async function POST(request: NextRequest) {
   const order = extractOrder(payload);
   const total = getOrderTotal(order);
 
-  if (total > MIN_ORDER_TOTAL) {
-    const message = formatTelegramMessage(order, total);
-    await broadcastToAll(message);
+  if (total <= MIN_ORDER_TOTAL) {
+    return NextResponse.json({ sent: false, reason: "below_threshold", total });
   }
 
-  return NextResponse.json({ sent: true });
+  try {
+    const result = await broadcastTelegramMessage(formatTelegramMessage(order, total));
+    return NextResponse.json({ sent: result.sent, failed: result.failed ?? 0, total });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Telegram broadcast failed" }, { status: 502 });
+  }
 }

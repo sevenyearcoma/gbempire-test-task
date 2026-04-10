@@ -15,12 +15,11 @@ Set these variables in Vercel or in `.env.local` for local testing:
 
 ```env
 TELEGRAM_BOT_TOKEN=123456789:telegram-bot-token
-TELEGRAM_CHAT_ID=123456789
 RETAILCRM_WEBHOOK_SECRET=long-random-secret
+SUPABASE_SERVICE_ROLE_KEY=service-role-key
 ```
 
-Keep `TELEGRAM_BOT_TOKEN` and `RETAILCRM_WEBHOOK_SECRET` server-only. Do not
-prefix them with `NEXT_PUBLIC_`.
+Keep these variables server-only. Do not prefix them with `NEXT_PUBLIC_`.
 
 ## Auth
 
