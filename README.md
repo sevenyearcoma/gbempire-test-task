@@ -14,6 +14,14 @@
 - Telegram-уведомления о новых крупных заказах
 - отдельная страница отчёта `/report`
 
+## Deployment
+
+Проект задеплоен на Vercel:
+
+- [dashboard-nine-murex-68.vercel.app](https://dashboard-nine-murex-68.vercel.app/)
+
+Это основной URL для проверки приложения.
+
 ## Важное перед проверкой
 
 - Сейчас в таблице `orders` и в RetailCRM специально `0` заказов, чтобы проверку можно было начать с чистого состояния.
@@ -155,6 +163,7 @@ npm run build
 Минимальный маршрут проверки такой:
 
 1. Открыть dashboard.
+   Production URL: [dashboard-nine-murex-68.vercel.app](https://dashboard-nine-murex-68.vercel.app/)
 2. Написать `/start` боту `@GBEmpire_RetailCRM_bot`.
 3. Загрузить `mock_orders.json` через pipeline.
 4. Убедиться, что заказы появились в dashboard.
