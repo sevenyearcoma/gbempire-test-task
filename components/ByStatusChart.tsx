@@ -1,35 +1,50 @@
-"use client";
+﻿"use client";
 
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 type StatusData = { name: string; value: number };
 
-const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6366f1", "#3b82f6"];
+const CHART_VARS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
 
 export default function ByStatusChart({ data }: { data: StatusData[] }) {
+  const chartConfig = Object.fromEntries(
+    data.map((item, index) => [
+      item.name,
+      { label: item.name, color: CHART_VARS[index % CHART_VARS.length] },
+    ])
+  ) satisfies ChartConfig;
+
   return (
-    <div className="bg-white rounded-xl shadow p-5">
-      <h2 className="text-base font-semibold text-gray-700 mb-4">Заказы по статусу</h2>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="bg-[#131b2e] p-6 rounded-xl">
+      <h2 className="text-lg font-bold text-[#dae2fd] mb-6">Статусы</h2>
+      <ChartContainer config={chartConfig} className="mx-auto max-h-64">
         <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-            labelLine={false}
-          >
-            {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+          <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
+          <Pie data={data} dataKey="value" nameKey="name" outerRadius={90}>
+            {data.map((item, index) => (
+              <Cell key={item.name} fill={CHART_VARS[index % CHART_VARS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(v) => [v, "Заказов"]} />
-          <Legend />
+          <ChartLegend
+            content={<ChartLegendContent nameKey="name" />}
+            className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+          />
         </PieChart>
-      </ResponsiveContainer>
+      </ChartContainer>
     </div>
   );
 }

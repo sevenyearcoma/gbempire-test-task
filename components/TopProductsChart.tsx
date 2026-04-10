@@ -1,14 +1,4 @@
-"use client";
-
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+﻿"use client";
 
 type ProductData = {
   name: string;
@@ -17,36 +7,31 @@ type ProductData = {
 };
 
 export default function TopProductsChart({ data }: { data: ProductData[] }) {
-  const top = data.slice(0, 10);
+  const top = data.slice(0, 8);
+  const max = top[0]?.quantity ?? 1;
 
   return (
-    <div className="bg-white rounded-xl shadow p-5">
-      <h2 className="text-base font-semibold text-gray-700 mb-4">Топ товары по количеству</h2>
-      <ResponsiveContainer width="100%" height={Math.max(200, top.length * 44)}>
-        <BarChart
-          data={top}
-          layout="vertical"
-          margin={{ top: 0, right: 80, left: 0, bottom: 0 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
-          <YAxis
-            type="category"
-            dataKey="name"
-            tick={{ fontSize: 11 }}
-            width={200}
-            tickLine={false}
-          />
-          <Tooltip
-            formatter={(value, name) =>
-              name === "quantity"
-                ? [value, "Кол-во"]
-                : [`${Number(value).toLocaleString("ru-RU")} ₸`, "Выручка"]
-            }
-          />
-          <Bar dataKey="quantity" fill="#6366f1" radius={[0, 4, 4, 0]} label={{ position: "right", fontSize: 11 }} />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="bg-[#131b2e] p-6 rounded-xl">
+      <h2 className="text-lg font-bold text-[#dae2fd] mb-6">Товары</h2>
+      <div className="space-y-5">
+        {top.map((product) => {
+          const widthPct = Math.round((product.quantity / max) * 100);
+          return (
+            <div key={product.name} className="space-y-2">
+              <div className="flex justify-between gap-4 text-xs font-semibold text-slate-400">
+                <span className="truncate max-w-[70%]">{product.name}</span>
+                <span>{product.revenue.toLocaleString("ru-RU")} ₸</span>
+              </div>
+              <div className="h-2.5 w-full bg-[#222a3d] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${widthPct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+import { MapPin, Package, Radio, Receipt, ShoppingBag, TrendingUp } from "lucide-react";
 
 type Props = {
   totalOrders: number;
@@ -9,22 +11,57 @@ type Props = {
   totalItems: number;
 };
 
-export default function StatsCards({ totalOrders, totalRevenue, topCity, topSource, avgOrder, totalItems }: Props) {
+export default function StatsCards(props: Props) {
   const cards = [
-    { label: "Всего заказов", value: totalOrders.toString() },
-    { label: "Выручка", value: `${totalRevenue.toLocaleString("ru-RU")} ₸` },
-    { label: "Средний чек", value: `${Math.round(avgOrder).toLocaleString("ru-RU")} ₸` },
-    { label: "Позиций продано", value: totalItems.toString() },
-    { label: "Топ город", value: topCity || "—" },
-    { label: "Топ источник", value: topSource || "—" },
+    {
+      label: "Заказы",
+      value: props.totalOrders.toLocaleString("ru-RU"),
+      icon: ShoppingBag,
+      className: "text-primary bg-primary/10",
+    },
+    {
+      label: "Выручка",
+      value: `${props.totalRevenue.toLocaleString("ru-RU")} ₸`,
+      icon: TrendingUp,
+      className: "text-[#4edea3] bg-[#4edea3]/10",
+    },
+    {
+      label: "Средний чек",
+      value: `${Math.round(props.avgOrder).toLocaleString("ru-RU")} ₸`,
+      icon: Receipt,
+      className: "text-[#b9c8de] bg-[#b9c8de]/10",
+    },
+    {
+      label: "Товары",
+      value: props.totalItems.toLocaleString("ru-RU"),
+      icon: Package,
+      className: "text-primary bg-primary/10",
+    },
+    {
+      label: "Город",
+      value: props.topCity || "—",
+      icon: MapPin,
+      className: "text-[#c7c4d7] bg-[#2d3449]",
+    },
+    {
+      label: "Источник",
+      value: props.topSource || "—",
+      icon: Radio,
+      className: "text-[#b9c8de] bg-[#39485a]",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {cards.map((card) => (
-        <div key={card.label} className="bg-white rounded-xl shadow p-5 flex flex-col gap-1">
-          <span className="text-sm text-gray-500">{card.label}</span>
-          <span className="text-2xl font-bold text-gray-900">{card.value}</span>
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {cards.map(({ label, value, icon: Icon, className }) => (
+        <div key={label} className="bg-[#131b2e] p-5 rounded-xl space-y-4">
+          <span className={`${className} p-2 rounded-lg inline-flex items-center justify-center`}>
+            <Icon className="size-4" />
+          </span>
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>
+            <p className="text-2xl font-bold tracking-tight text-[#dae2fd] truncate">{value}</p>
+          </div>
         </div>
       ))}
     </div>

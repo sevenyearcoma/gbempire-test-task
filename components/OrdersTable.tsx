@@ -1,144 +1,161 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Order, OrderItem, parseItems } from "@/lib/supabase";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  "offer-analog": { label: "Предложение аналога", color: "bg-yellow-100 text-yellow-800" },
-  "new": { label: "Новый", color: "bg-blue-100 text-blue-800" },
-  "in-progress": { label: "В работе", color: "bg-indigo-100 text-indigo-800" },
-  "complete": { label: "Завершён", color: "bg-green-100 text-green-800" },
-  "cancel": { label: "Отменён", color: "bg-red-100 text-red-800" },
+const STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  "offer-analog": { label: "Аналог", className: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
+  new: { label: "Новый", className: "bg-primary/10 text-primary border border-primary/20" },
+  "in-progress": { label: "В работе", className: "bg-[#b9c8de]/10 text-[#b9c8de] border border-[#b9c8de]/20" },
+  complete: { label: "Завершён", className: "bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20" },
+  cancel: { label: "Отменён", className: "bg-[#ffb4ab]/10 text-[#ffb4ab] border border-[#ffb4ab]/20" },
 };
 
+const PAGE_SIZE = 10;
+
 function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_LABELS[status] ?? { label: status, color: "bg-gray-100 text-gray-700" };
+  const s = STATUS_LABELS[status] ?? { label: status, className: "bg-[#2d3449] text-slate-400 border border-[#46455440]" };
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${s.color}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${s.className}`}>
       {s.label}
     </span>
   );
 }
 
 function ItemsList({ items }: { items: OrderItem[] }) {
-  if (!items.length) return <span className="text-gray-400 text-xs">—</span>;
+  if (!items.length) return <span className="text-slate-500">—</span>;
   return (
-    <ul className="space-y-1">
+    <div className="flex flex-col gap-1">
       {items.map((item) => (
-        <li key={item.id} className="text-xs text-gray-700">
-          <span className="font-medium">{item.offer?.displayName ?? item.offer?.name}</span>
-          <span className="text-gray-400 ml-1">
-            × {item.quantity} · {(item.initialPrice * item.quantity).toLocaleString("ru-RU")} ₸
+        <span key={item.id} className="text-xs">
+          <span className="font-medium text-[#c7c4d7]">
+            {item.offer?.displayName ?? item.offer?.name}
           </span>
-        </li>
+          <span className="text-slate-500 ml-1">× {item.quantity}</span>
+        </span>
       ))}
-    </ul>
+    </div>
   );
 }
 
 export default function OrdersTable({ orders }: { orders: Order[] }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  const statuses = Array.from(new Set(orders.map((o) => o.status)));
+  const statuses = Array.from(new Set(orders.map((order) => order.status)));
 
-  const filtered = orders.filter((o) => {
-    const fullName = `${o.first_name} ${o.last_name}`.toLowerCase();
+  const filtered = orders.filter((order) => {
+    const fullName = `${order.first_name} ${order.last_name}`.toLowerCase();
+    const query = search.toLowerCase();
     const matchSearch =
       !search ||
-      fullName.includes(search.toLowerCase()) ||
-      o.phone.includes(search) ||
-      o.email.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || o.status === statusFilter;
+      fullName.includes(query) ||
+      order.phone.includes(search) ||
+      String(order.retailcrm_id).includes(search);
+    const matchStatus = statusFilter === "all" || order.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
-  return (
-    <div className="bg-white rounded-xl shadow p-5">
-      <h2 className="text-base font-semibold text-gray-700 mb-4">Список заказов</h2>
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Поиск по клиенту, телефону, email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-        />
+  return (
+    <div className="bg-[#131b2e] rounded-xl overflow-hidden">
+      <div className="p-5 border-b border-[#46455420] flex flex-wrap gap-3 justify-between items-center">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <input
+            className="w-full bg-[#222a3d] border-none rounded-xl pl-12 pr-4 py-3 text-sm text-[#dae2fd] focus:ring-1 focus:ring-primary outline-none placeholder:text-slate-500"
+            placeholder="Клиент, телефон или ID"
+            value={search}
+            onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+          />
+        </div>
         <select
+          className="bg-[#222a3d] border-none rounded-xl py-3 px-4 text-sm text-[#dae2fd] focus:ring-1 focus:ring-primary outline-none"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
         >
           <option value="all">Все статусы</option>
-          {statuses.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABELS[s]?.label ?? s}
-            </option>
+          {statuses.map((status) => (
+            <option key={status} value={status}>{STATUS_LABELS[status]?.label ?? status}</option>
           ))}
         </select>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
-              <th className="pb-2 pr-4 font-medium">#</th>
-              <th className="pb-2 pr-4 font-medium">Клиент</th>
-              <th className="pb-2 pr-4 font-medium">Телефон</th>
-              <th className="pb-2 pr-4 font-medium">Город</th>
-              <th className="pb-2 pr-4 font-medium">Адрес</th>
-              <th className="pb-2 pr-4 font-medium">Статус</th>
-              <th className="pb-2 pr-4 font-medium">Товары</th>
-              <th className="pb-2 font-medium text-right">Сумма</th>
+            <tr className="bg-[#2d3449]/30">
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">ID</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Клиент</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Телефон</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Город</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Статус</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Товары</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Сумма</th>
             </tr>
           </thead>
-          <tbody>
-            {filtered.map((order) => {
+          <tbody className="divide-y divide-[#46455415]">
+            {paged.map((order) => {
               const items = parseItems(order.items as string | OrderItem[]);
               return (
-                <tr
-                  key={order.retailcrm_id}
-                  className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="py-3 pr-4 text-gray-400">{order.retailcrm_id}</td>
-                  <td className="py-3 pr-4">
-                    <div className="font-medium text-gray-900">
-                      {order.first_name} {order.last_name}
-                    </div>
-                    <div className="text-xs text-gray-400">{order.email}</div>
+                <tr key={order.retailcrm_id} className="hover:bg-[#222a3d] transition-colors">
+                  <td className="px-6 py-5 font-mono text-sm text-primary font-bold">#{order.retailcrm_id}</td>
+                  <td className="px-6 py-5">
+                    <p className="text-sm font-semibold text-[#dae2fd]">{order.first_name} {order.last_name}</p>
+                    <p className="text-[10px] text-slate-500">{order.email}</p>
                   </td>
-                  <td className="py-3 pr-4 text-gray-600 whitespace-nowrap">{order.phone}</td>
-                  <td className="py-3 pr-4 text-gray-600">{order.city || "—"}</td>
-                  <td className="py-3 pr-4 text-gray-500 max-w-[180px] truncate" title={order.delivery_address}>
-                    {order.delivery_address || "—"}
+                  <td className="px-6 py-5 text-sm text-[#dae2fd]">{order.phone}</td>
+                  <td className="px-6 py-5">
+                    <p className="text-sm text-[#dae2fd]">{order.city || "—"}</p>
+                    {order.delivery_address && (
+                      <p className="text-[10px] text-slate-500 max-w-[140px] truncate">{order.delivery_address}</p>
+                    )}
                   </td>
-                  <td className="py-3 pr-4">
-                    <StatusBadge status={order.status} />
-                  </td>
-                  <td className="py-3 pr-4 min-w-[200px]">
-                    <ItemsList items={items} />
-                  </td>
-                  <td className="py-3 text-right font-semibold text-gray-900 whitespace-nowrap">
+                  <td className="px-6 py-5"><StatusBadge status={order.status} /></td>
+                  <td className="px-6 py-5 min-w-[180px]"><ItemsList items={items} /></td>
+                  <td className="px-6 py-5 text-right font-semibold text-[#dae2fd] whitespace-nowrap">
                     {(order.total_sum || 0).toLocaleString("ru-RU")} ₸
                   </td>
                 </tr>
               );
             })}
-            {filtered.length === 0 && (
+            {paged.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-gray-400">
-                  Заказы не найдены
-                </td>
+                <td colSpan={7} className="py-12 text-center text-slate-500">Заказы не найдены</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3">
-        Показано {filtered.length} из {orders.length} заказов
-      </p>
+      <div className="p-5 border-t border-[#46455420] flex justify-between items-center gap-4">
+        <p className="text-xs text-slate-500">
+          {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}—{Math.min(safePage * PAGE_SIZE, filtered.length)} из {filtered.length}
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={safePage === 1}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#171f33] hover:bg-[#2d3449] text-slate-400 transition-colors disabled:opacity-40"
+            aria-label="Предыдущая страница"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={safePage === totalPages}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#171f33] hover:bg-[#2d3449] text-slate-400 transition-colors disabled:opacity-40"
+            aria-label="Следующая страница"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

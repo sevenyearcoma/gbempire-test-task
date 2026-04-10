@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSupabase, Order, OrderItem, parseItems } from "@/lib/supabase";
 import StatsCards from "@/components/StatsCards";
@@ -24,17 +24,16 @@ export default async function Home() {
 
   if (error || !orders) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-red-500">Ошибка загрузки данных: {error?.message}</p>
+      <main className="min-h-screen bg-[#0b1326] flex items-center justify-center p-6">
+        <p className="text-[#ffb4ab] text-sm">Ошибка загрузки данных: {error?.message}</p>
       </main>
     );
   }
 
   const totalOrders = orders.length;
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.total_sum || 0), 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.total_sum || 0), 0);
   const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-  // Aggregate items across all orders
   const productMap = new Map<string, { quantity: number; revenue: number }>();
   let totalItems = 0;
 
@@ -68,7 +67,7 @@ export default async function Home() {
     .map(([city, items]) => ({
       city,
       orders: items.length,
-      revenue: items.reduce((s, o) => s + (o.total_sum || 0), 0),
+      revenue: items.reduce((sum, order) => sum + (order.total_sum || 0), 0),
     }))
     .sort((a, b) => b.orders - a.orders);
 
@@ -81,33 +80,33 @@ export default async function Home() {
     .sort((a, b) => b.value - a.value);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6 md:p-10">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Дашборд заказов</h1>
-          <p className="text-sm text-gray-500 mt-1">Данные из RetailCRM → Supabase</p>
+    <main className="mx-auto max-w-7xl p-6 space-y-6">
+      <h1 className="text-3xl font-bold tracking-tight text-[#dae2fd]">Заказы</h1>
+
+      <StatsCards
+        totalOrders={totalOrders}
+        totalRevenue={totalRevenue}
+        topCity={topCity}
+        topSource={topSource}
+        avgOrder={avgOrder}
+        totalItems={totalItems}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <ByCityChart data={cityChartData} />
         </div>
-
-        <StatsCards
-          totalOrders={totalOrders}
-          totalRevenue={totalRevenue}
-          topCity={topCity}
-          topSource={topSource}
-          avgOrder={avgOrder}
-          totalItems={totalItems}
-        />
-
-        <ByCityChart data={cityChartData} />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="lg:col-span-4">
           <BySourceChart data={sourceChartData} />
-          <ByStatusChart data={statusChartData} />
         </div>
-
-        {topProducts.length > 0 && <TopProductsChart data={topProducts} />}
-
-        <OrdersTable orders={orders} />
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ByStatusChart data={statusChartData} />
+        {topProducts.length > 0 && <TopProductsChart data={topProducts} />}
+      </div>
+
+      <OrdersTable orders={orders} />
     </main>
   );
 }
