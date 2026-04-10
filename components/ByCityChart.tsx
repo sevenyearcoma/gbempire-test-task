@@ -24,8 +24,11 @@ const chartConfig = {
 export default function ByCityChart({ data }: { data: CityData[] }) {
   const top = data.slice(0, 12);
   return (
-    <div className="bg-[#131b2e] p-6 rounded-xl h-full">
-      <h2 className="text-lg font-bold text-[#dae2fd] mb-6">Города</h2>
+    <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel)] p-6 h-full shadow-[0_10px_28px_rgba(14,18,28,.05)]">
+      <div className="mb-6">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Revenue Mix</p>
+        <h2 className="mt-1 text-lg font-bold text-foreground">Города</h2>
+      </div>
       <ChartContainer config={chartConfig} className="max-h-72 w-full">
         <BarChart data={top} margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#46455440" />

@@ -1,5 +1,6 @@
 ﻿export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { Order, OrderItem, parseItems } from "@/lib/supabase";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import StatsCards from "@/components/StatsCards";
@@ -84,7 +85,18 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-7xl p-6 space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight text-[#dae2fd]">Заказы</h1>
+      <div className="flex flex-col gap-4 rounded-xl border border-[var(--hero-border)] bg-[var(--hero-bg)] p-6 sm:flex-row sm:items-center sm:justify-between shadow-[0_10px_28px_rgba(14,18,28,.05)]">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)]">Operations Dashboard</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--hero-foreground)]">Заказы</h1>
+        </div>
+        <Link
+          href="/report"
+          className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_16px_32px_rgba(0,0,0,.14)] transition-transform hover:-translate-y-0.5"
+        >
+          Смотреть интерактивный отчёт
+        </Link>
+      </div>
 
       <StatsCards
         totalOrders={totalOrders}

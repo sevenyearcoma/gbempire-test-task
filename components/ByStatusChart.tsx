@@ -29,8 +29,11 @@ export default function ByStatusChart({ data }: { data: StatusData[] }) {
   ) satisfies ChartConfig;
 
   return (
-    <div className="bg-[#131b2e] p-6 rounded-xl">
-      <h2 className="text-lg font-bold text-[#dae2fd] mb-6">Статусы</h2>
+    <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel)] p-6 shadow-[0_10px_28px_rgba(14,18,28,.05)]">
+      <div className="mb-6">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Distribution</p>
+        <h2 className="mt-1 text-lg font-bold text-foreground">Статусы</h2>
+      </div>
       <ChartContainer config={chartConfig} className="mx-auto max-h-64">
         <PieChart>
           <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />

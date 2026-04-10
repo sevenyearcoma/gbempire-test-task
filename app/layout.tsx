@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,12 +13,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ru"
-      className="dark h-full antialiased"
-      suppressHydrationWarning
-    >
-      <body className="min-h-full bg-[#0b1326] text-[#dae2fd]">
+    <html lang="ru" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full bg-background text-foreground transition-colors">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (() => {
+                const savedTheme = localStorage.getItem("dashboard-theme");
+                const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                const theme = savedTheme || (prefersDark ? "dark" : "light");
+                document.documentElement.classList.toggle("dark", theme === "dark");
+                document.documentElement.dataset.theme = theme;
+              })();
+            `,
+          }}
+        />
+        <div className="fixed right-4 top-4 z-50">
+          <ThemeToggle />
+        </div>
         {children}
       </body>
     </html>

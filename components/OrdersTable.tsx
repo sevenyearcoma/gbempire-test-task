@@ -5,17 +5,17 @@ import { Order, OrderItem, parseItems } from "@/lib/supabase";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  "offer-analog": { label: "Аналог", className: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
+  "offer-analog": { label: "Аналог", className: "bg-amber-500/10 text-amber-500 border border-amber-500/20" },
   new: { label: "Новый", className: "bg-primary/10 text-primary border border-primary/20" },
-  "in-progress": { label: "В работе", className: "bg-[#b9c8de]/10 text-[#b9c8de] border border-[#b9c8de]/20" },
-  complete: { label: "Завершён", className: "bg-[#4edea3]/10 text-[#4edea3] border border-[#4edea3]/20" },
-  cancel: { label: "Отменён", className: "bg-[#ffb4ab]/10 text-[#ffb4ab] border border-[#ffb4ab]/20" },
+  "in-progress": { label: "В работе", className: "bg-sky-500/10 text-sky-500 border border-sky-500/20" },
+  complete: { label: "Завершён", className: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" },
+  cancel: { label: "Отменён", className: "bg-rose-500/10 text-rose-500 border border-rose-500/20" },
 };
 
 const PAGE_SIZE = 10;
 
 function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_LABELS[status] ?? { label: status, className: "bg-[#2d3449] text-slate-400 border border-[#46455440]" };
+  const s = STATUS_LABELS[status] ?? { label: status, className: "bg-[var(--surface-container-high)] text-slate-400 border border-[var(--panel-border)]" };
   return (
     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${s.className}`}>
       {s.label}
@@ -63,19 +63,19 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="bg-[#131b2e] rounded-xl overflow-hidden">
-      <div className="p-5 border-b border-[#46455420] flex flex-wrap gap-3 justify-between items-center">
+    <div className="rounded-xl overflow-hidden border border-[var(--panel-border)] bg-[var(--panel)] shadow-[0_10px_28px_rgba(14,18,28,.05)]">
+      <div className="p-5 border-b border-[var(--panel-border)] flex flex-wrap gap-3 justify-between items-center">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <input
-            className="w-full bg-[#222a3d] border-none rounded-xl pl-12 pr-4 py-3 text-sm text-[#dae2fd] focus:ring-1 focus:ring-primary outline-none placeholder:text-slate-500"
+            className="w-full bg-[var(--surface-bright)] border border-[var(--panel-border)] rounded-xl pl-12 pr-4 py-3 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-slate-500"
             placeholder="Клиент, телефон или ID"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1); }}
           />
         </div>
         <select
-          className="bg-[#222a3d] border-none rounded-xl py-3 px-4 text-sm text-[#dae2fd] focus:ring-1 focus:ring-primary outline-none"
+          className="bg-[var(--surface-bright)] border border-[var(--panel-border)] rounded-xl py-3 px-4 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
           value={statusFilter}
           onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
         >
@@ -89,7 +89,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#2d3449]/30">
+            <tr className="bg-[var(--surface-container-high)]">
               <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">ID</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Клиент</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Телефон</th>
@@ -99,26 +99,26 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
               <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Сумма</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#46455415]">
+          <tbody className="divide-y divide-[var(--panel-border)]">
             {paged.map((order) => {
               const items = parseItems(order.items as string | OrderItem[]);
               return (
-                <tr key={order.retailcrm_id} className="hover:bg-[#222a3d] transition-colors">
+                <tr key={order.retailcrm_id} className="hover:bg-[var(--surface-container-low)] transition-colors">
                   <td className="px-6 py-5 font-mono text-sm text-primary font-bold">#{order.retailcrm_id}</td>
                   <td className="px-6 py-5">
-                    <p className="text-sm font-semibold text-[#dae2fd]">{order.first_name} {order.last_name}</p>
+                    <p className="text-sm font-semibold text-foreground">{order.first_name} {order.last_name}</p>
                     <p className="text-[10px] text-slate-500">{order.email}</p>
                   </td>
-                  <td className="px-6 py-5 text-sm text-[#dae2fd]">{order.phone}</td>
+                  <td className="px-6 py-5 text-sm text-foreground">{order.phone}</td>
                   <td className="px-6 py-5">
-                    <p className="text-sm text-[#dae2fd]">{order.city || "—"}</p>
+                    <p className="text-sm text-foreground">{order.city || "—"}</p>
                     {order.delivery_address && (
                       <p className="text-[10px] text-slate-500 max-w-[140px] truncate">{order.delivery_address}</p>
                     )}
                   </td>
                   <td className="px-6 py-5"><StatusBadge status={order.status} /></td>
                   <td className="px-6 py-5 min-w-[180px]"><ItemsList items={items} /></td>
-                  <td className="px-6 py-5 text-right font-semibold text-[#dae2fd] whitespace-nowrap">
+                  <td className="px-6 py-5 text-right font-semibold text-foreground whitespace-nowrap">
                     {(order.total_sum || 0).toLocaleString("ru-RU")} ₸
                   </td>
                 </tr>
@@ -133,7 +133,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
         </table>
       </div>
 
-      <div className="p-5 border-t border-[#46455420] flex justify-between items-center gap-4">
+      <div className="p-5 border-t border-[var(--panel-border)] flex justify-between items-center gap-4">
         <p className="text-xs text-slate-500">
           {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}—{Math.min(safePage * PAGE_SIZE, filtered.length)} из {filtered.length}
         </p>
@@ -141,7 +141,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
           <button
             onClick={() => setPage((current) => Math.max(1, current - 1))}
             disabled={safePage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#171f33] hover:bg-[#2d3449] text-slate-400 transition-colors disabled:opacity-40"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--surface-container-high)] hover:bg-[var(--surface-container-highest)] text-slate-500 transition-colors disabled:opacity-40"
             aria-label="Предыдущая страница"
           >
             <ChevronLeft className="size-4" />
@@ -149,7 +149,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
           <button
             onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
             disabled={safePage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#171f33] hover:bg-[#2d3449] text-slate-400 transition-colors disabled:opacity-40"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--surface-container-high)] hover:bg-[var(--surface-container-highest)] text-slate-500 transition-colors disabled:opacity-40"
             aria-label="Следующая страница"
           >
             <ChevronRight className="size-4" />
