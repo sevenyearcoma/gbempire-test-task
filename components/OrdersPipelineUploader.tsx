@@ -28,6 +28,10 @@ type ManualOrderForm = {
   city: string;
   deliveryAddress: string;
   utmSource: string;
+  items: ManualOrderItem[];
+};
+
+type ManualOrderItem = {
   productName: string;
   quantity: string;
   initialPrice: string;
@@ -66,6 +70,12 @@ function getInitialManualOrder(): ManualOrderForm {
     city: "",
     deliveryAddress: "",
     utmSource: "",
+    items: [getInitialManualOrderItem()],
+  };
+}
+
+function getInitialManualOrderItem(): ManualOrderItem {
+  return {
     productName: "",
     quantity: "1",
     initialPrice: "",
@@ -109,6 +119,36 @@ export default function OrdersPipelineUploader() {
     value: ManualOrderForm[K]
   ) {
     setManualOrder((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleManualOrderItemChange(
+    index: number,
+    key: keyof ManualOrderItem,
+    value: string
+  ) {
+    setManualOrder((current) => ({
+      ...current,
+      items: current.items.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item
+      ),
+    }));
+  }
+
+  function addManualOrderItem() {
+    setManualOrder((current) => ({
+      ...current,
+      items: [...current.items, getInitialManualOrderItem()],
+    }));
+  }
+
+  function removeManualOrderItem(index: number) {
+    setManualOrder((current) => ({
+      ...current,
+      items:
+        current.items.length === 1
+          ? current.items
+          : current.items.filter((_, itemIndex) => itemIndex !== index),
+    }));
   }
 
   async function sendPipelinePayload(payload: unknown) {
@@ -169,23 +209,32 @@ export default function OrdersPipelineUploader() {
 
     if (
       !manualOrder.firstName.trim() ||
-      !manualOrder.phone.trim() ||
-      !manualOrder.productName.trim()
+      !manualOrder.phone.trim()
     ) {
-      setError("Для ручного заказа нужны минимум имя, телефон и товар.");
+      setError("Для ручного заказа нужны минимум имя и телефон.");
       return;
     }
 
-    const quantity = Number(manualOrder.quantity);
-    const initialPrice = Number(manualOrder.initialPrice);
+    const items = manualOrder.items
+      .map((item) => ({
+        productName: item.productName.trim(),
+        quantity: Number(item.quantity),
+        initialPrice: Number(item.initialPrice),
+      }))
+      .filter((item) => item.productName);
 
-    if (!Number.isFinite(quantity) || quantity <= 0) {
-      setError("Количество должно быть больше нуля.");
+    if (items.length === 0) {
+      setError("Добавь хотя бы один товар.");
       return;
     }
 
-    if (!Number.isFinite(initialPrice) || initialPrice <= 0) {
-      setError("Цена должна быть больше нуля.");
+    if (items.some((item) => !Number.isFinite(item.quantity) || item.quantity <= 0)) {
+      setError("Количество у каждого товара должно быть больше нуля.");
+      return;
+    }
+
+    if (items.some((item) => !Number.isFinite(item.initialPrice) || item.initialPrice <= 0)) {
+      setError("Цена у каждого товара должна быть больше нуля.");
       return;
     }
 
@@ -198,13 +247,7 @@ export default function OrdersPipelineUploader() {
         orderType: "eshop-individual",
         orderMethod: "shopping-cart",
         status: "new",
-        items: [
-          {
-            productName: manualOrder.productName.trim(),
-            quantity,
-            initialPrice,
-          },
-        ],
+        items,
         delivery: {
           address: {
             city: manualOrder.city.trim(),
@@ -388,36 +431,80 @@ export default function OrdersPipelineUploader() {
                 placeholder="instagram"
               />
             </label>
-            <label className="space-y-2 text-sm">
-              <span className="font-medium text-foreground">Товар</span>
-              <input
-                value={manualOrder.productName}
-                onChange={(event) => handleManualOrderChange("productName", event.target.value)}
-                className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
-                placeholder="Подушка"
-              />
-            </label>
-            <label className="space-y-2 text-sm">
-              <span className="font-medium text-foreground">Количество</span>
-              <input
-                type="number"
-                min="1"
-                value={manualOrder.quantity}
-                onChange={(event) => handleManualOrderChange("quantity", event.target.value)}
-                className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
-              />
-            </label>
-            <label className="space-y-2 text-sm">
-              <span className="font-medium text-foreground">Цена</span>
-              <input
-                type="number"
-                min="1"
-                value={manualOrder.initialPrice}
-                onChange={(event) => handleManualOrderChange("initialPrice", event.target.value)}
-                className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
-                placeholder="65000"
-              />
-            </label>
+          </div>
+
+          <div className="mt-5 rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] p-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Товары</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Можно добавить несколько позиций в один заказ.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addManualOrderItem}
+                className="inline-flex items-center justify-center rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-container-low)]"
+              >
+                Добавить позицию
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {manualOrder.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-1 gap-3 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] p-4 md:grid-cols-[minmax(0,1.8fr)_120px_140px_auto]"
+                >
+                  <label className="space-y-2 text-sm">
+                    <span className="font-medium text-foreground">Товар {index + 1}</span>
+                    <input
+                      value={item.productName}
+                      onChange={(event) =>
+                        handleManualOrderItemChange(index, "productName", event.target.value)
+                      }
+                      className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
+                      placeholder="Утягивающий комбидресс Nova Slim"
+                    />
+                  </label>
+                  <label className="space-y-2 text-sm">
+                    <span className="font-medium text-foreground">Количество</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(event) =>
+                        handleManualOrderItemChange(index, "quantity", event.target.value)
+                      }
+                      className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
+                    />
+                  </label>
+                  <label className="space-y-2 text-sm">
+                    <span className="font-medium text-foreground">Цена</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.initialPrice}
+                      onChange={(event) =>
+                        handleManualOrderItemChange(index, "initialPrice", event.target.value)
+                      }
+                      className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
+                      placeholder="65000"
+                    />
+                  </label>
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => removeManualOrderItem(index)}
+                      disabled={manualOrder.items.length === 1}
+                      className="w-full rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
