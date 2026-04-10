@@ -7,6 +7,7 @@ import ByCityChart from "@/components/ByCityChart";
 import BySourceChart from "@/components/BySourceChart";
 import ByStatusChart from "@/components/ByStatusChart";
 import OrdersTable from "@/components/OrdersTable";
+import OrdersPipelineUploader from "@/components/OrdersPipelineUploader";
 import TopProductsChart from "@/components/TopProductsChart";
 
 function groupBy<T>(arr: T[], key: keyof T): Record<string, T[]> {
@@ -93,6 +94,8 @@ export default async function Home() {
         avgOrder={avgOrder}
         totalItems={totalItems}
       />
+
+      <OrdersPipelineUploader />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8">

@@ -15,6 +15,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 RETAILCRM_WEBHOOK_SECRET = os.getenv("RETAILCRM_WEBHOOK_SECRET")
 NOTIFICATIONS_WEBHOOK_URL = os.getenv("NOTIFICATIONS_WEBHOOK_URL")
 VERCEL_URL = os.getenv("VERCEL_URL")
+NOTIFY_FROM_SYNC_SCRIPT = os.getenv("NOTIFY_FROM_SYNC_SCRIPT") == "true"
 MIN_ORDER_TOTAL = 50_000
 
 if not NOTIFICATIONS_WEBHOOK_URL and VERCEL_URL:
@@ -128,6 +129,10 @@ def get_existing_order_ids(retailcrm_ids):
 
 
 def notify_large_new_orders(rows, existing_order_ids):
+    if not NOTIFY_FROM_SYNC_SCRIPT:
+        print("Telegram webhook из sync_orders.py выключен. Ожидается Supabase Database Webhook.")
+        return
+
     if not NOTIFICATIONS_WEBHOOK_URL:
         print("NOTIFICATIONS_WEBHOOK_URL/VERCEL_URL не задан, Telegram webhook пропущен.")
         return
@@ -162,7 +167,13 @@ def notify_large_new_orders(rows, existing_order_ids):
                 headers=headers,
                 timeout=20,
             )
-            response.raise_for_status()
+            if not response.ok:
+                print(
+                    f"Telegram webhook вернул {response.status_code} "
+                    f"для заказа #{retailcrm_id}: {response.text}"
+                )
+                continue
+            print(f"Telegram webhook ответил для заказа #{retailcrm_id}: {response.text}")
             notified += 1
         except requests.exceptions.RequestException as e:
             print(f"Не удалось отправить Telegram webhook для заказа #{retailcrm_id}: {e}")
