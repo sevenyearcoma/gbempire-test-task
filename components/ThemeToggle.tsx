@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Moon, Sun } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +27,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
+      data-tour="theme-toggle"
       className="inline-flex items-center gap-2 rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-sm font-medium text-[var(--panel-foreground)] shadow-[0_10px_26px_rgba(14,18,28,.10)] backdrop-blur-sm transition-transform hover:-translate-y-0.5"
       aria-label="Переключить тему"
     >

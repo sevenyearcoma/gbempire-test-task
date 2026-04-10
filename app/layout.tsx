@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import AppTour from "@/components/AppTour";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         <div className="fixed right-4 top-4 z-50">
           <ThemeToggle />
         </div>
+        <AppTour />
         {children}
       </body>
     </html>

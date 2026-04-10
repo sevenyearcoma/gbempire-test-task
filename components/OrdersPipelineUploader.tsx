@@ -291,10 +291,14 @@ export default function OrdersPipelineUploader() {
             type="password"
             value={pipelineSecret}
             onChange={(event) => setPipelineSecret(event.target.value)}
+            data-tour="pipeline-secret"
             placeholder="Секрет выгрузки"
             className="min-w-56 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
           />
-          <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-container-low)]">
+          <label
+            data-tour="json-upload"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-container-low)]"
+          >
             <UploadCloud className="size-4" />
             Выбрать JSON
             <input
@@ -307,6 +311,7 @@ export default function OrdersPipelineUploader() {
           <button
             type="button"
             onClick={runPipeline}
+            data-tour="run-pipeline"
             disabled={!jsonText || !pipelineSecret || isUploading}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -355,7 +360,10 @@ export default function OrdersPipelineUploader() {
           </div>
         )}
 
-        <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--surface-bright)] p-5">
+        <div
+          data-tour="manual-order"
+          className="rounded-xl border border-[var(--panel-border)] bg-[var(--surface-bright)] p-5"
+        >
           <div className="mb-4">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
               Ручное добавление

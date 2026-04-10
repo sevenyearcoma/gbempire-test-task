@@ -92,6 +92,7 @@ export default async function Home() {
         </div>
         <Link
           href="/report"
+          data-tour="report-link"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_16px_32px_rgba(0,0,0,.14)] transition-transform hover:-translate-y-0.5"
         >
           Смотреть интерактивный отчёт
