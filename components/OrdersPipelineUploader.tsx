@@ -86,7 +86,6 @@ export default function OrdersPipelineUploader() {
   const router = useRouter();
   const [fileName, setFileName] = useState("");
   const [jsonText, setJsonText] = useState("");
-  const [pipelineSecret, setPipelineSecret] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
@@ -156,7 +155,6 @@ export default function OrdersPipelineUploader() {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-pipeline-secret": pipelineSecret,
       },
       body: JSON.stringify(payload),
     });
@@ -201,11 +199,6 @@ export default function OrdersPipelineUploader() {
   async function createManualOrder() {
     setError("");
     setSummary(null);
-
-    if (!pipelineSecret) {
-      setError("Нужен секрет выгрузки.");
-      return;
-    }
 
     if (
       !manualOrder.firstName.trim() ||
@@ -282,19 +275,12 @@ export default function OrdersPipelineUploader() {
           <h2 className="mt-1 text-xl font-bold text-foreground">Mock orders JSON и ручной ввод</h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">
             Можно загрузить JSON-файл или собрать один заказ вручную. Оба сценария идут в
-            один и тот же pipeline: дедупликация, RetailCRM upload и sync в Supabase.
+            один и тот же pipeline: дедупликация, RetailCRM upload и sync в Supabase, без
+            дополнительного ввода паролей и секретов.
           </p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="password"
-            value={pipelineSecret}
-            onChange={(event) => setPipelineSecret(event.target.value)}
-            data-tour="pipeline-secret"
-            placeholder="Секрет выгрузки"
-            className="min-w-56 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm text-foreground outline-none placeholder:text-slate-500 focus:ring-1 focus:ring-primary"
-          />
           <label
             data-tour="json-upload"
             className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--panel-border)] bg-[var(--surface-bright)] px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-container-low)]"
@@ -312,7 +298,7 @@ export default function OrdersPipelineUploader() {
             type="button"
             onClick={runPipeline}
             data-tour="run-pipeline"
-            disabled={!jsonText || !pipelineSecret || isUploading}
+            disabled={!jsonText || isUploading}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isUploading ? (
@@ -519,7 +505,7 @@ export default function OrdersPipelineUploader() {
             <button
               type="button"
               onClick={createManualOrder}
-              disabled={!pipelineSecret || isCreating}
+              disabled={isCreating}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isCreating ? (

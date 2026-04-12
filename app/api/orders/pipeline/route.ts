@@ -36,22 +36,6 @@ function getRetailCrmConfig() {
   };
 }
 
-function getPipelineSecret() {
-  return process.env.PIPELINE_UPLOAD_SECRET ?? process.env.RETAILCRM_WEBHOOK_SECRET;
-}
-
-function isPipelineAuthorized(request: Request) {
-  const expectedSecret = getPipelineSecret();
-  if (!expectedSecret) return false;
-
-  const authorization = request.headers.get("authorization");
-  const bearer = authorization?.startsWith("Bearer ")
-    ? authorization.slice("Bearer ".length).trim()
-    : null;
-
-  return request.headers.get("x-pipeline-secret") === expectedSecret || bearer === expectedSecret;
-}
-
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as JsonRecord)
@@ -258,10 +242,6 @@ async function syncRetailCrmOrdersToSupabase(retailCrmOrders: JsonRecord[]) {
 }
 
 export async function POST(request: Request) {
-  if (!isPipelineAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   let body: unknown;
 
   try {

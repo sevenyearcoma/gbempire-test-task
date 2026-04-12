@@ -2,18 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import { sendTelegramMessage } from "@/lib/telegram";
 
-function isAuthorized(request: NextRequest) {
-    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-    if (!expectedSecret) return true;
-
-    return request.headers.get("x-telegram-bot-api-secret-token") === expectedSecret;
-}
-
 export async function POST(request: NextRequest) {
-    if (!isAuthorized(request)) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     try {
         const body = await request.json();
         const chatId = body.message?.chat?.id?.toString();

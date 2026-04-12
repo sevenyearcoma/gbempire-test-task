@@ -55,9 +55,8 @@ note: readme тоже сделан с помощью иишки, кроме па
 
 Что нужно сделать:
 
-1. Ввести `pipeline secret`.
-2. Выбрать `mock_orders.json` или свой JSON такого же формата.
-3. Нажать `Запустить pipeline`.
+1. Выбрать `mock_orders.json` или свой JSON такого же формата.
+2. Нажать `Запустить pipeline`.
 
 Что делает pipeline:
 
@@ -115,17 +114,55 @@ Pipeline принимает:
 
 `New order -> Supabase INSERT -> webhook -> /api/notifications/retailcrm-order -> Telegram`
 
-## Безопасность
+## Упрощение доступа
 
-В проекте есть базовые меры защиты:
+Для текущей версии я убрал дополнительные security measures, потому что здесь тестовое приложение и используются mock data.
+
+Что снято:
 
 - Basic Auth на dashboard
-- secret-проверка для pipeline route
-- secret-проверка для webhook уведомлений
-- server-only доступ к Supabase через `SUPABASE_SERVICE_ROLE_KEY`
-- дополнительная защита Telegram webhook через secret token
+- обязательный `pipeline secret` для загрузки JSON
+- secret-проверка для webhook route уведомлений
+- secret token-проверка для Telegram webhook
 
-Секреты и env-переменные сюда не дублирую. Файл с env передаётся отдельно.
+Что осталось:
+
+- server-only доступ к Supabase через `SUPABASE_SERVICE_ROLE_KEY`
+- обычные рабочие интеграционные env-переменные для Supabase, RetailCRM и Telegram
+
+Это сделано специально, чтобы приложение можно было открыть и проверить без отдельной передачи логина, пароля и секретов.
+
+## Что поменять в Vercel
+
+В настройках проекта в `Settings -> Environment Variables` больше не нужны:
+
+- `DASHBOARD_USERNAME`
+- `DASHBOARD_PASSWORD`
+- `PIPELINE_UPLOAD_SECRET`
+- `RETAILCRM_WEBHOOK_SECRET`
+- `TELEGRAM_WEBHOOK_SECRET`
+
+Оставить нужно:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RETAILCRM_PERSONAL_DOMAIN`
+- `RETAILCRM_API_KEY`
+- `TELEGRAM_BOT_TOKEN`
+
+После удаления лишних переменных нужно сделать redeploy.
+
+## Что поменять в Supabase
+
+Если в Supabase Database Webhook на отправку в `/api/notifications/retailcrm-order` был добавлен secret в headers, его теперь нужно убрать.
+
+То есть в webhook-конфигурации:
+
+- оставить тот же URL на Vercel
+- оставить trigger на `INSERT` в `orders`, если он уже нужен для уведомлений
+- удалить кастомный header с secret, например `x-webhook-secret` или `Authorization: Bearer ...`
+
+Если для Telegram webhook раньше использовался secret token, в логике приложения он больше не проверяется, так что отдельная синхронизация этого секрета больше не нужна.
 
 ## Локальный запуск
 
@@ -163,7 +200,7 @@ npm run build
 
 1. Открыть dashboard: [dashboard-nine-murex-68.vercel.app](https://dashboard-nine-murex-68.vercel.app/)
 2. Написать `/start` боту `@GBEmpire_RetailCRM_bot`
-3. Загрузить `mock_orders.json` через pipeline
+3. Загрузить `mock_orders.json` через pipeline без ввода секрета
 4. Убедиться, что заказы появились в dashboard
 5. Добавить один заказ вручную через форму
 6. Проверить, что синхронизация с RetailCRM и Supabase отработала

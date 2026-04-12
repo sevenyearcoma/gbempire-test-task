@@ -30,26 +30,6 @@ type OrderPayload = {
   } | null;
 };
 
-function unauthorized() {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-}
-
-function getAuthToken(request: NextRequest): string | null {
-  const authorization = request.headers.get("authorization");
-  if (authorization?.startsWith("Bearer ")) {
-    return authorization.slice("Bearer ".length).trim();
-  }
-
-  return request.headers.get("x-webhook-secret");
-}
-
-function isAuthorized(request: NextRequest): boolean {
-  const expectedSecret = process.env.RETAILCRM_WEBHOOK_SECRET;
-  if (!expectedSecret) return false;
-
-  return getAuthToken(request) === expectedSecret;
-}
-
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -115,10 +95,6 @@ function formatTelegramMessage(order: OrderPayload, total: number): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return unauthorized();
-  }
-
   let payload: unknown;
 
   try {

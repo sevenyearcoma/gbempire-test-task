@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { HelpCircle, X } from "lucide-react";
@@ -20,40 +20,40 @@ const TOUR_STORAGE_KEY = "dashboard-tour-completed";
 
 const steps: TourStep[] = [
   {
-    id: "pipeline-secret",
-    title: "Секрет выгрузки",
+    id: "json-upload",
+    title: "Загрузка без секрета",
     description:
-      "Сюда нужно вставить pipeline secret. Он нужен и для загрузки JSON, и для ручного добавления заказа.",
+      "Файл можно выбрать и сразу отправить в pipeline. Дополнительный secret для загрузки и ручного добавления заказа больше не нужен.",
   },
   {
     id: "json-upload",
-    title: "Загрузка JSON",
+    title: "Р—Р°РіСЂСѓР·РєР° JSON",
     description:
-      "Здесь можно выбрать `mock_orders.json` из репозитория или свой файл такого же формата.",
+      "Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РІС‹Р±СЂР°С‚СЊ `mock_orders.json` РёР· СЂРµРїРѕР·РёС‚РѕСЂРёСЏ РёР»Рё СЃРІРѕР№ С„Р°Р№Р» С‚Р°РєРѕРіРѕ Р¶Рµ С„РѕСЂРјР°С‚Р°.",
   },
   {
     id: "run-pipeline",
-    title: "Запуск pipeline",
+    title: "Р—Р°РїСѓСЃРє pipeline",
     description:
-      "Эта кнопка запускает весь поток: дедупликация, загрузка в RetailCRM и синхронизация в Supabase.",
+      "Р­С‚Р° РєРЅРѕРїРєР° Р·Р°РїСѓСЃРєР°РµС‚ РІРµСЃСЊ РїРѕС‚РѕРє: РґРµРґСѓРїР»РёРєР°С†РёСЏ, Р·Р°РіСЂСѓР·РєР° РІ RetailCRM Рё СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РІ Supabase.",
   },
   {
     id: "manual-order",
-    title: "Ручное добавление заказа",
+    title: "Р СѓС‡РЅРѕРµ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РєР°Р·Р°",
     description:
-      "Здесь можно собрать заказ вручную, добавить несколько товаров и отправить его в тот же pipeline.",
+      "Р—РґРµСЃСЊ РјРѕР¶РЅРѕ СЃРѕР±СЂР°С‚СЊ Р·Р°РєР°Р· РІСЂСѓС‡РЅСѓСЋ, РґРѕР±Р°РІРёС‚СЊ РЅРµСЃРєРѕР»СЊРєРѕ С‚РѕРІР°СЂРѕРІ Рё РѕС‚РїСЂР°РІРёС‚СЊ РµРіРѕ РІ С‚РѕС‚ Р¶Рµ pipeline.",
   },
   {
     id: "report-link",
-    title: "Страница отчёта",
+    title: "РЎС‚СЂР°РЅРёС†Р° РѕС‚С‡С‘С‚Р°",
     description:
-      "Тут лежит интерактивный отчёт: как строилось приложение, где были проблемы и как они решались.",
+      "РўСѓС‚ Р»РµР¶РёС‚ РёРЅС‚РµСЂР°РєС‚РёРІРЅС‹Р№ РѕС‚С‡С‘С‚: РєР°Рє СЃС‚СЂРѕРёР»РѕСЃСЊ РїСЂРёР»РѕР¶РµРЅРёРµ, РіРґРµ Р±С‹Р»Рё РїСЂРѕР±Р»РµРјС‹ Рё РєР°Рє РѕРЅРё СЂРµС€Р°Р»РёСЃСЊ.",
   },
   {
     id: "theme-toggle",
-    title: "Переключатель темы",
+    title: "РџРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ С‚РµРјС‹",
     description:
-      "Сверху справа можно переключать светлую и тёмную темы. Выбор сохраняется локально в браузере.",
+      "РЎРІРµСЂС…Сѓ СЃРїСЂР°РІР° РјРѕР¶РЅРѕ РїРµСЂРµРєР»СЋС‡Р°С‚СЊ СЃРІРµС‚Р»СѓСЋ Рё С‚С‘РјРЅСѓСЋ С‚РµРјС‹. Р’С‹Р±РѕСЂ СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ Р»РѕРєР°Р»СЊРЅРѕ РІ Р±СЂР°СѓР·РµСЂРµ.",
   },
 ];
 
@@ -154,7 +154,7 @@ export default function AppTour() {
           className="inline-flex items-center gap-2 rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-sm font-medium text-[var(--panel-foreground)] shadow-[0_10px_26px_rgba(14,18,28,.10)] transition-transform hover:-translate-y-0.5"
         >
           <HelpCircle className="size-4" />
-          Тур
+          РўСѓСЂ
         </button>
       </div>
 
@@ -181,7 +181,7 @@ export default function AppTour() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                  Шаг {currentStep + 1} из {steps.length}
+                  РЁР°Рі {currentStep + 1} РёР· {steps.length}
                 </p>
                 <h3 className="mt-1 text-lg font-bold">{step.title}</h3>
               </div>
@@ -189,7 +189,7 @@ export default function AppTour() {
                 type="button"
                 onClick={() => closeTour(true)}
                 className="rounded-lg border border-[var(--panel-border)] p-2 text-slate-500 transition-colors hover:bg-[var(--surface-container-low)]"
-                aria-label="Закрыть тур"
+                aria-label="Р—Р°РєСЂС‹С‚СЊ С‚СѓСЂ"
               >
                 <X className="size-4" />
               </button>
@@ -206,7 +206,7 @@ export default function AppTour() {
                 disabled={currentStep === 0}
                 className="rounded-lg border border-[var(--panel-border)] px-4 py-2 text-sm font-semibold transition-colors hover:bg-[var(--surface-container-low)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Назад
+                РќР°Р·Р°Рґ
               </button>
 
               <div className="flex items-center gap-2">
@@ -215,14 +215,14 @@ export default function AppTour() {
                   onClick={() => closeTour(true)}
                   className="rounded-lg px-4 py-2 text-sm font-semibold text-[var(--on-surface-variant)] transition-colors hover:bg-[var(--surface-container-low)]"
                 >
-                  Пропустить
+                  РџСЂРѕРїСѓСЃС‚РёС‚СЊ
                 </button>
                 <button
                   type="button"
                   onClick={nextStep}
                   className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-colors hover:opacity-90"
                 >
-                  {isLastStep ? "Готово" : "Дальше"}
+                  {isLastStep ? "Р“РѕС‚РѕРІРѕ" : "Р”Р°Р»СЊС€Рµ"}
                 </button>
               </div>
             </div>
